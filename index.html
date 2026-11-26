@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web TTS Sederhana</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; }
+    textarea { width: 100%; height: 150px; padding: 10px; font-size: 16px; box-sizing: border-box; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>Text-to-Speech Browser</h2>
+  <textarea id="teks" placeholder="Ketik teks Bahasa Indonesia di sini..."></textarea><br>
+  <button onclick="bicara()">Putar Suara</button>
+  <button onclick="berhenti()">Stop</button>
+
+  <script>
+    function bicara() {
+      window.speechSynthesis.cancel();
+      const kalimat = new SpeechSynthesisUtterance(document.getElementById("teks").value);
+      kalimat.lang = "id-ID";
+      kalimat.rate = 1.0;
+      window.speechSynthesis.speak(kalimat);
+    }
+    function berhenti() {
+      window.speechSynthesis.cancel();
+    }
+  </script>
+</body>
+</html>
