@@ -1,0 +1,75 @@
+name: Studio TTS Neural (Indo & Inggris)
+
+on:
+  workflow_dispatch:
+    inputs:
+      teks:
+        description: 'Tulis naskah di sini (gunakan tanda ? ! , ... agar intonasi seperti manusia)'
+        required: true
+        type: string
+      voice:
+        description: 'Pilih Suara (Indonesia & Inggris)'
+        required: true
+        default: 'id-ID-GadisNeural'
+        type: choice
+        options:
+          - id-ID-GadisNeural
+          - id-ID-ArdiNeural
+          - en-US-AvaNeural
+          - en-US-AndrewNeural
+          - en-US-AriaNeural
+          - en-US-GuyNeural
+          - en-GB-SoniaNeural
+          - en-GB-RyanNeural
+      rate:
+        description: 'Kecepatan Bicara (-10% santai, +0% normal, +10% cepat)'
+        required: true
+        default: '+0%'
+        type: string
+      pitch:
+        description: 'Nada Suara (-5Hz lebih dalam/berat, +0Hz normal, +5Hz lebih ceria)'
+        required: true
+        default: '+0Hz'
+        type: string
+
+jobs:
+  generate-tts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Siapkan Python di Cloud GitHub
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Neural TTS Engine
+        run: pip install edge-tts
+
+      - name: Konversi Teks ke Suara Neural
+        env:
+          INPUT_TEKS: ${{ inputs.teks }}
+          INPUT_VOICE: ${{ inputs.voice }}
+          INPUT_RATE: ${{ inputs.rate }}
+          INPUT_PITCH: ${{ inputs.pitch }}
+        run: |
+          python - << 'EOF'
+          import os, re, asyncio, edge_tts
+
+          teks = os.environ["INPUT_TEKS"].strip()
+          teks = re.sub(r'\n+', '. ', teks)
+
+          voice = os.environ["INPUT_VOICE"]
+          rate = os.environ["INPUT_RATE"]
+          pitch = os.environ["INPUT_PITCH"]
+
+          async def main():
+              communicate = edge_tts.Communicate(teks, voice, rate=rate, pitch=pitch)
+              await communicate.save("hasil_suara_neural.mp3")
+
+          asyncio.run(main())
+          EOF
+
+      - name: Siapkan File MP3 untuk Diunduh
+        uses: actions/upload-artifact@v4
+        with:
+          name: hasil-suara-tts
+          path: hasil_suara_neural.mp3
